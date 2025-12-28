@@ -1,5 +1,4 @@
-import React, { useMemo, useState } from 'react';
-import { View, Text, PanResponder, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 function pointsToPath(points) {
@@ -11,36 +10,10 @@ function pointsToPath(points) {
   }
   return d;
 }
-const SketchPad = () => {
-  const [strokes, setStrokes] = useState([]);
-  const [current, setCurrent] = useState([]);
-  console.log(Path);
 
-  const panResponder = useMemo(
-    () =>
-      PanResponder.create({
-        onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: () => true,
-        onPanResponderGrant: e => {
-          const { locationX, locationY } = e.nativeEvent;
-          setCurrent([{ x: locationX, y: locationY }]);
-        },
-        onPanResponderMove: e => {
-          const { locationX, locationY } = e.nativeEvent;
-          setCurrent(prev => [...prev, { x: locationX, y: locationY }]);
-        },
-        onPanResponderRelease: e => {
-          setStrokes(prev => (current.length ? [...prev, current] : prev));
-          setCurrent([]);
-        },
-      }),
-    [current],
-  );
+const SketchPad = ({ mode, strokes, panResponder, current }) => {
   return (
-    <View
-      {...panResponder.panHandlers}
-      style={{ margin: 20, height: 400, borderWidth: 2, borderColor: 'black' }}
-    >
+    <View {...panResponder.panHandlers} style={style.sketchPadStyle}>
       <Svg style={StyleSheet.absoluteFill}>
         {strokes.map((pts, i) => (
           <Path
@@ -49,16 +22,24 @@ const SketchPad = () => {
             stroke="black"
             strokeWidth={4}
             fill="none"
-          ></Path>
+          />
         ))}
         <Path
-          d={pointsToPath(current)}
+          d={mode === 'draw' ? pointsToPath(current) : null}
           stroke="black"
           fill="none"
           strokeWidth={4}
-        ></Path>
+        />
       </Svg>
     </View>
   );
 };
+const style = StyleSheet.create({
+  sketchPadStyle: {
+    margin: 20,
+    height: 400,
+    borderWidth: 2,
+    borderColor: 'black',
+  },
+});
 export default SketchPad;

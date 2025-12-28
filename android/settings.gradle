@@ -1,6 +1,39 @@
-pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
-plugins { id("com.facebook.react.settings") }
-extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
-rootProject.name = 'PickaPic'
-include ':app'
-includeBuild('../node_modules/@react-native/gradle-plugin')
+// React Native Gradle Settings plugin (autolinking)
+pluginManagement {
+  includeBuild("../node_modules/@react-native/gradle-plugin")
+
+  repositories {
+    gradlePluginPortal()
+    google()
+    mavenCentral()
+  }
+
+  plugins {
+    // ✅ Gradle 9에서 IBM_SEMERU 이슈 회피용(이미 하셨던 것)
+    id "org.gradle.toolchains.foojay-resolver-convention" version "1.0.0"
+  }
+}
+
+plugins {
+  // ✅ RN 공식 문서/커뮤니티 템플릿 방식
+  id("com.facebook.react.settings")
+}
+
+extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+  ex.autolinkLibrariesFromCommand()
+}
+
+dependencyResolutionManagement {
+  repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+
+  repositories {
+    google()
+    mavenCentral()
+  }
+}
+
+
+rootProject.name = "PickaPic"
+include(":app")
+
+includeBuild("../node_modules/@react-native/gradle-plugin")
