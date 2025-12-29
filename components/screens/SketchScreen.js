@@ -1,13 +1,12 @@
-import React from 'react';
-import { useState, useMemo, useRef } from 'react';
-import { SafeAreaView, PanResponder, View } from 'react-native';
+import React, { useState, useMemo, useRef } from 'react';
+import { SafeAreaView, View, Text, Button, PanResponder } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 
-import Header from './components/Header.js';
-import SketchPad from './components/SketchPad.js';
-import ToolBar from './components/ToolBar.js';
+import Header from '../Header.js';
+import SketchPad from '../SketchPad.js';
+import ToolBar from '../ToolBar.js';
 
-export default function App() {
+export default function HomeScreen({ navigation }) {
   const [mode, setMode] = useState('draw');
   const [strokes, setStrokes] = useState([]);
   const [current, setCurrent] = useState([]);
@@ -24,6 +23,7 @@ export default function App() {
   const handleSearch = async () => {
     const img = await captureRef(sketchRef, { format: 'png', quality: 1 });
     console.log(img);
+    navigation.navigate('Result', { img });
   };
   const panResponder = useMemo(
     () =>
@@ -74,22 +74,21 @@ export default function App() {
       }),
     [current, mode],
   );
-
   return (
-    <SafeAreaView>
-      <Header></Header>
+    <SafeAreaView style={{ flex: 1 }}>
+      <Header />
       <SketchPad
         mode={mode}
         strokes={strokes}
         panResponder={panResponder}
         current={current}
         sketchRef={sketchRef}
-      ></SketchPad>
+      />
       <ToolBar
         handleMode={handleMode}
         refresh={refresh}
-        handleSearch={handleSearch}
-      ></ToolBar>
+        handleSearch={handleSearch} // ✅ 이 버튼 누르면 넘어감
+      />
     </SafeAreaView>
   );
 }
