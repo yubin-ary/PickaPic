@@ -1,5 +1,6 @@
 import { View, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { captureRef } from 'react-native-view-shot';
 
 function pointsToPath(points) {
   if (points.length === 0) return '';
@@ -11,9 +12,13 @@ function pointsToPath(points) {
   return d;
 }
 
-const SketchPad = ({ mode, strokes, panResponder, current }) => {
+const SketchPad = ({ mode, strokes, panResponder, current, sketchRef }) => {
   return (
-    <View {...panResponder.panHandlers} style={style.sketchPadStyle}>
+    <View
+      {...panResponder.panHandlers}
+      style={style.sketchPadStyle}
+      ref={sketchRef}
+    >
       <Svg style={StyleSheet.absoluteFill}>
         {strokes.map((pts, i) => (
           <Path

@@ -1,6 +1,8 @@
 import React from 'react';
-import { useState, useMemo } from 'react';
-import { SafeAreaView, PanResponder } from 'react-native';
+import { useState, useMemo, useRef } from 'react';
+import { SafeAreaView, PanResponder, View } from 'react-native';
+import { captureRef } from 'react-native-view-shot';
+
 import Header from './components/Header.js';
 import SketchPad from './components/SketchPad.js';
 import ToolBar from './components/ToolBar.js';
@@ -9,6 +11,7 @@ export default function App() {
   const [mode, setMode] = useState('draw');
   const [strokes, setStrokes] = useState([]);
   const [current, setCurrent] = useState([]);
+  const sketchRef = useRef(null);
   const ERASE_RADIUS = 12;
   const handleMode = modeName => {
     setMode(`${modeName}`);
@@ -17,6 +20,10 @@ export default function App() {
     setMode('draw');
     setCurrent([]);
     setStrokes([]);
+  };
+  const handleSearch = async () => {
+    const img = await captureRef(sketchRef, { format: 'png', quality: 1 });
+    console.log(img);
   };
   const panResponder = useMemo(
     () =>
@@ -76,8 +83,13 @@ export default function App() {
         strokes={strokes}
         panResponder={panResponder}
         current={current}
+        sketchRef={sketchRef}
       ></SketchPad>
-      <ToolBar handleMode={handleMode} refresh={refresh}></ToolBar>
+      <ToolBar
+        handleMode={handleMode}
+        refresh={refresh}
+        handleSearch={handleSearch}
+      ></ToolBar>
     </SafeAreaView>
   );
 }
