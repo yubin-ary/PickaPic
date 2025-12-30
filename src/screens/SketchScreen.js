@@ -1,12 +1,12 @@
 import React, { useState, useMemo, useRef } from 'react';
-import { SafeAreaView,PanResponder } from 'react-native';
+import { SafeAreaView, PanResponder } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 
 import Header from '../components/Header.js';
 import SketchPad from '../components/SketchPad.js';
 import ToolBar from '../components/ToolBar.js';
 
-export default function HomeScreen({ navigation }) {
+export default function SketchScreen({ navigation }) {
   const [mode, setMode] = useState('draw');
   const [strokes, setStrokes] = useState([]);
   const [current, setCurrent] = useState([]);
@@ -21,7 +21,10 @@ export default function HomeScreen({ navigation }) {
     setStrokes([]);
   };
   const handleSearch = async () => {
-    const img = await captureRef(sketchRef, { format: 'png', quality: 1 });
+    const img = await captureRef(sketchRef.current, {
+      format: 'png',
+      quality: 1,
+    });
     console.log(img);
     navigation.navigate('Result', { img });
   };
@@ -87,7 +90,7 @@ export default function HomeScreen({ navigation }) {
       <ToolBar
         handleMode={handleMode}
         refresh={refresh}
-        handleSearch={handleSearch} // ✅ 이 버튼 누르면 넘어감
+        handleSearch={handleSearch}
       />
     </SafeAreaView>
   );
