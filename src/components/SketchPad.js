@@ -1,6 +1,6 @@
 import { View, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { captureRef } from 'react-native-view-shot';
+
 
 function pointsToPath(points) {
   if (points.length === 0) return '';

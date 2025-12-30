@@ -3,8 +3,8 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import SketchScreen from './components/screens/SketchScreen.js';
-import ResultScreen from './components/screens/ResultScreen.js';
+import SketchScreen from './src/screens/SketchScreen.js';
+import ResultScreen from './src/screens/ResultScreen.js';
 const Stack = createNativeStackNavigator();
 export default function App() {
   return (

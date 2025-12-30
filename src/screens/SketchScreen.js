@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useRef } from 'react';
-import { SafeAreaView, View, Text, Button, PanResponder } from 'react-native';
+import { SafeAreaView,PanResponder } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 
-import Header from '../Header.js';
-import SketchPad from '../SketchPad.js';
-import ToolBar from '../ToolBar.js';
+import Header from '../components/Header.js';
+import SketchPad from '../components/SketchPad.js';
+import ToolBar from '../components/ToolBar.js';
 
 export default function HomeScreen({ navigation }) {
   const [mode, setMode] = useState('draw');
