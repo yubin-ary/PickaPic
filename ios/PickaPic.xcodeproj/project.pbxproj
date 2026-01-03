@@ -262,6 +262,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = PickaPic/Info.plist;
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "스케치와 유사한 사진을 찾기 위해 사진 보관함의 이미지에 접근합니다.";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -289,6 +290,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = PickaPic/Info.plist;
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "스케치와 유사한 사진을 찾기 위해 사진 보관함의 이미지에 접근합니다.";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

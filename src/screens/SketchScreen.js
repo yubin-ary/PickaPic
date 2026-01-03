@@ -1,18 +1,21 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { SafeAreaView, PanResponder } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
+import { CameraRoll } from '@react-native-camera-roll/camera-roll';
+import Canvas from 'react-native-canvas';
 
 import Header from '../components/Header.js';
 import SketchPad from '../components/SketchPad.js';
 import ToolBar from '../components/ToolBar.js';
 
-import { compareImages } from '../services/similarity/index.js';
+import compareImages from '../services/similarity/index.js';
 
 export default function SketchScreen({ navigation }) {
   const [mode, setMode] = useState('draw');
   const [strokes, setStrokes] = useState([]);
   const [current, setCurrent] = useState([]);
   const sketchRef = useRef(null);
+  const canvasRef = useRef(null);
   const ERASE_RADIUS = 12;
   const handleMode = modeName => {
     setMode(`${modeName}`);
@@ -25,14 +28,27 @@ export default function SketchScreen({ navigation }) {
   const handleSearch = async () => {
     const img = await captureRef(sketchRef.current, {
       format: 'png',
+      result: 'tmpfile',
       quality: 1,
     });
+    const photos = await CameraRoll.getPhotos({
+      first: 30,
+      groupTypes: 'All',
+      assetType: 'Photos',
+    });
+    const photoUris = photos.edges.map(v => {
+      return v.node.image.uri;
+    });
+    compareImages({
+      canvas: canvasRef.current,
+      sketchUri: img,
+      photoUris: photoUris,
+      option: { top: 3 },
+    });
 
-    compareImages(img, photoUris, options);
-
-    console.log(img);
     navigation.navigate('Result', { img });
   };
+
   const panResponder = useMemo(
     () =>
       PanResponder.create({
@@ -97,6 +113,7 @@ export default function SketchScreen({ navigation }) {
         refresh={refresh}
         handleSearch={handleSearch}
       />
+      <Canvas style={{ width: 10, height: 10 }} ref={canvasRef} />
     </SafeAreaView>
   );
 }
