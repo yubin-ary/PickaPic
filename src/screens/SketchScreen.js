@@ -6,6 +6,8 @@ import Header from '../components/Header.js';
 import SketchPad from '../components/SketchPad.js';
 import ToolBar from '../components/ToolBar.js';
 
+import { compareImages } from '../services/similarity/index.js';
+
 export default function SketchScreen({ navigation }) {
   const [mode, setMode] = useState('draw');
   const [strokes, setStrokes] = useState([]);
@@ -25,6 +27,9 @@ export default function SketchScreen({ navigation }) {
       format: 'png',
       quality: 1,
     });
+
+    compareImages(img, photoUris, options);
+
     console.log(img);
     navigation.navigate('Result', { img });
   };

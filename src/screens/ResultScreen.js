@@ -3,7 +3,6 @@ import { SafeAreaView, Image, Text } from 'react-native';
 
 export default function ResultScreen({ route }) {
   const { img } = route.params ?? {};
-
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Text style={{ padding: 12 }}>ResultScreen</Text>
