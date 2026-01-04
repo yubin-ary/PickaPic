@@ -17,6 +17,7 @@ const SketchPad = ({ mode, strokes, panResponder, current, sketchRef }) => {
     <View
       {...panResponder.panHandlers}
       style={style.sketchPadStyle}
+      collapsable={false}
       ref={sketchRef}
     >
       <Svg style={StyleSheet.absoluteFill}>
@@ -45,6 +46,7 @@ const style = StyleSheet.create({
     height: 400,
     borderWidth: 2,
     borderColor: 'black',
+    backgroundColor: 'white',
   },
 });
 export default SketchPad;

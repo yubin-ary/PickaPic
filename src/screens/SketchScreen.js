@@ -28,9 +28,10 @@ export default function SketchScreen({ navigation }) {
   const handleSearch = async () => {
     const img = await captureRef(sketchRef.current, {
       format: 'png',
-      result: 'tmpfile',
+      result: 'base64',
       quality: 1,
     });
+    const dataUri = `data:image/png;base64,${img}`;
     const photos = await CameraRoll.getPhotos({
       first: 30,
       groupTypes: 'All',
@@ -39,14 +40,15 @@ export default function SketchScreen({ navigation }) {
     const photoUris = photos.edges.map(v => {
       return v.node.image.uri;
     });
+    console.log(photoUris);
     compareImages({
       canvas: canvasRef.current,
-      sketchUri: img,
+      sketchUri: dataUri,
       photoUris: photoUris,
       option: { top: 3 },
     });
 
-    navigation.navigate('Result', { img });
+    navigation.navigate('Result', { img: dataUri });
   };
 
   const panResponder = useMemo(
