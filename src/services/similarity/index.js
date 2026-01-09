@@ -1,14 +1,15 @@
-import normalize from './preprocess/normalize';
+import normalize, { edgeify, threshold } from './preprocess/normalize';
+import dhash from './hash/dhash';
 import phash from './hash/phash';
 import hamming from './hash/hamming';
 
-const albumHexCache = new Map();
 const compareImages = async ({ canvas, sketchUri, photoUris, option }) => {
   // options 에서 상위 몇개 추출할건지..  등 전달
   // 1. normalize 호출 :  greyscale
-  // 2. phash : DCT 기반 16진수 해시 생성(비교용이))
+  // 2. phash + dhash : 두 해시를 함께 사용
   /* normalize(sketchUri); //return luma
     phash(luma); //return hex
+    dhash(luma); //return hex
     hamming(hex); // return  score */
   if (!canvas || typeof canvas.getContext !== 'function') {
     return;
@@ -17,30 +18,39 @@ const compareImages = async ({ canvas, sketchUri, photoUris, option }) => {
   if (!Array.isArray(sketchLuma) || sketchLuma.length === 0) {
     return;
   }
-  const sketchHex = await phash(sketchLuma);
+  const sketchEdge = edgeify(sketchLuma);
+  const sketchBin = threshold(sketchEdge, 64);
+  const sketchDhash = await dhash(sketchBin);
+  const sketchPhash = await phash(sketchBin);
 
-  const albumHex = [];
-  const albumHexInfo = [];
+  const albumDhash = [];
+  const albumPhash = [];
+  const albumUris = [];
   for (const uri of photoUris) {
     const luma = await normalize(canvas, uri);
     if (Array.isArray(luma) && luma.length > 0) {
-      const hex = await phash(luma);
-      albumHexCache.set(hex, uri);
-      albumHex.push(hex);
-      albumHexInfo.push({ hex, uri });
+      const edge = edgeify(luma);
+      const bin = threshold(edge, 64);
+      const dHex = await dhash(bin);
+      const pHex = await phash(bin);
+      albumDhash.push(dHex);
+      albumPhash.push(pHex);
+      albumUris.push(uri);
     }
   }
-  console.log(sketchHex);
-  console.log(albumHex);
-  const top5Index = await hamming(sketchHex, albumHex);
-  console.log(top5Index);
-  const top5Uri = [];
-  if (Array.isArray(top5Index)) {
-    for (const idx of top5Index) {
-      const entry = albumHexInfo[idx];
-      if (entry?.uri) top5Uri.push(entry.uri);
-    }
-  }
-  return top5Uri;
+  const dhashDist = hamming(sketchDhash, albumDhash);
+  const phashDist = hamming(sketchPhash, albumPhash);
+
+  const weightDhash = 0.2;
+  const weightPhash = 0.8;
+  const topCount = option?.top ?? 5;
+
+  const scored = albumUris.map((uri, idx) => {
+    const d = dhashDist[idx] ?? Number.POSITIVE_INFINITY;
+    const p = phashDist[idx] ?? Number.POSITIVE_INFINITY;
+    return { uri, score: weightDhash * d + weightPhash * p };
+  });
+  const top = scored.sort((a, b) => a.score - b.score).slice(0, topCount);
+  return top.map(v => v.uri);
 };
 export default compareImages;

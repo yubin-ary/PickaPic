@@ -50,6 +50,41 @@ const getLuma = data => {
   }
   return luma;
 };
+const edgeify = luma => {
+  if (!Array.isArray(luma) || luma.length !== HASH_WIDTH * HASH_HEIGHT) {
+    return luma;
+  }
+  const edges = new Array(luma.length).fill(0);
+  let max = 0;
+  for (let y = 1; y < HASH_HEIGHT - 1; y++) {
+    for (let x = 1; x < HASH_WIDTH - 1; x++) {
+      const idx = y * HASH_WIDTH + x;
+      const tl = luma[idx - HASH_WIDTH - 1];
+      const tc = luma[idx - HASH_WIDTH];
+      const tr = luma[idx - HASH_WIDTH + 1];
+      const ml = luma[idx - 1];
+      const mr = luma[idx + 1];
+      const bl = luma[idx + HASH_WIDTH - 1];
+      const bc = luma[idx + HASH_WIDTH];
+      const br = luma[idx + HASH_WIDTH + 1];
+
+      const gx = -tl + tr + -2 * ml + 2 * mr + -bl + br;
+      const gy = -tl - 2 * tc - tr + bl + 2 * bc + br;
+      const mag = Math.sqrt(gx * gx + gy * gy);
+      edges[idx] = mag;
+      if (mag > max) max = mag;
+    }
+  }
+  if (max === 0) return edges;
+  for (let i = 0; i < edges.length; i++) {
+    edges[i] = (edges[i] / max) * 255;
+  }
+  return edges;
+};
+const threshold = (luma, value = 64) => {
+  if (!Array.isArray(luma)) return luma;
+  return luma.map(v => (v >= value ? 255 : 0));
+};
 const normalizeStrokes = async (canvas, strokes, size) => {
   if (!canvas || typeof canvas.getContext !== 'function') return [];
   if (!size?.width || !size?.height) return [];
@@ -115,5 +150,5 @@ const normalize = async (canvas, uri) => {
     newImage.src = src;
   });
 };
-export { normalizeStrokes };
+export { edgeify, normalizeStrokes, threshold };
 export default normalize;

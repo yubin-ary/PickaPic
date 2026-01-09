@@ -49,7 +49,7 @@ export default function SketchScreen({ navigation }) {
       sketchStrokes: allStrokes,
       sketchSize,
       photoUris: photoUris,
-      option: { top: 3 },
+      option: { top: 5 },
     });
     console.log(compareResult);
 
@@ -127,7 +127,10 @@ export default function SketchScreen({ navigation }) {
         refresh={refresh}
         handleSearch={handleSearch}
       />
-      <Canvas style={{ width: 10, height: 10 }} ref={canvasRef} />
+      <Canvas
+        style={{ width: 10, height: 10, opacity: 0, position: 'absolute' }}
+        ref={canvasRef}
+      />
     </SafeAreaView>
   );
 }
