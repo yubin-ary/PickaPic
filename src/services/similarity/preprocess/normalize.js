@@ -2,6 +2,9 @@ import { Image } from 'react-native-canvas';
 import ImageResizer from 'react-native-image-resizer';
 import RNFS from 'react-native-fs';
 
+const HASH_WIDTH = 65;
+const HASH_HEIGHT = 64;
+
 const stripFileScheme = path => {
   if (!path) return path;
   if (path.startsWith('ph://')) {
@@ -20,8 +23,8 @@ const resolveCanvasSrc = async uri => {
 
   const resized = await ImageResizer.createResizedImage(
     uri,
-    17,
-    16,
+    HASH_WIDTH,
+    HASH_HEIGHT,
     'PNG',
     100,
   );
@@ -47,19 +50,56 @@ const getLuma = data => {
   }
   return luma;
 };
+const normalizeStrokes = async (canvas, strokes, size) => {
+  if (!canvas || typeof canvas.getContext !== 'function') return [];
+  if (!size?.width || !size?.height) return [];
+  if (!Array.isArray(strokes) || strokes.length === 0) return [];
+
+  canvas.width = HASH_WIDTH;
+  canvas.height = HASH_HEIGHT;
+  const ctx = canvas.getContext('2d');
+  const scaleX = HASH_WIDTH / size.width;
+  const scaleY = HASH_HEIGHT / size.height;
+  const scale = Math.min(scaleX, scaleY);
+
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, HASH_WIDTH, HASH_HEIGHT);
+  ctx.strokeStyle = 'black';
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.lineWidth = Math.max(1, 4 * scale);
+
+  strokes.forEach(points => {
+    if (!Array.isArray(points) || points.length === 0) return;
+    ctx.beginPath();
+    ctx.moveTo(points[0].x * scaleX, points[0].y * scaleY);
+    for (let i = 1; i < points.length; i++) {
+      ctx.lineTo(points[i].x * scaleX, points[i].y * scaleY);
+    }
+    ctx.stroke();
+  });
+
+  const imageData = await ctx.getImageData(0, 0, HASH_WIDTH, HASH_HEIGHT);
+  return getLuma(Object.values(imageData.data));
+};
 const normalize = async (canvas, uri) => {
   const resolved = await resolveCanvasSrc(uri);
   const src = resolved;
-  canvas.width = 17;
-  canvas.height = 16;
+  canvas.width = HASH_WIDTH;
+  canvas.height = HASH_HEIGHT;
   const ctx = canvas.getContext('2d');
   const newImage = new Image(canvas);
 
   return new Promise((resolve, reject) => {
     newImage.addEventListener('load', async () => {
       try {
-        ctx.drawImage(newImage, 0, 0, 17, 16);
-        const imageData = await ctx.getImageData(0, 0, 17, 16);
+        ctx.drawImage(newImage, 0, 0, HASH_WIDTH, HASH_HEIGHT);
+        const imageData = await ctx.getImageData(
+          0,
+          0,
+          HASH_WIDTH,
+          HASH_HEIGHT,
+        );
         const data = getLuma(Object.values(imageData.data));
         resolve(data);
       } catch (err) {
@@ -75,4 +115,5 @@ const normalize = async (canvas, uri) => {
     newImage.src = src;
   });
 };
+export { normalizeStrokes };
 export default normalize;

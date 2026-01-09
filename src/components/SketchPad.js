@@ -12,13 +12,21 @@ function pointsToPath(points) {
   return d;
 }
 
-const SketchPad = ({ mode, strokes, panResponder, current, sketchRef }) => {
+const SketchPad = ({
+  mode,
+  strokes,
+  panResponder,
+  current,
+  sketchRef,
+  onLayout,
+}) => {
   return (
     <View
       {...panResponder.panHandlers}
       style={style.sketchPadStyle}
       collapsable={false}
       ref={sketchRef}
+      onLayout={onLayout}
     >
       <Svg style={StyleSheet.absoluteFill}>
         {strokes.map((pts, i) => (
@@ -26,7 +34,7 @@ const SketchPad = ({ mode, strokes, panResponder, current, sketchRef }) => {
             key={i}
             d={pointsToPath(pts)}
             stroke="black"
-            strokeWidth={4}
+            strokeWidth={12}
             fill="none"
           />
         ))}
@@ -34,7 +42,7 @@ const SketchPad = ({ mode, strokes, panResponder, current, sketchRef }) => {
           d={mode === 'draw' ? pointsToPath(current) : null}
           stroke="black"
           fill="none"
-          strokeWidth={4}
+          strokeWidth={12}
         />
       </Svg>
     </View>

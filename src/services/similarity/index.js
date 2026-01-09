@@ -1,5 +1,8 @@
 import normalize from './preprocess/normalize';
 import dhash from './hash/dhash';
+import hamming from './hash/hamming';
+
+const albumHexCache = new Map();
 const compareImages = async ({ canvas, sketchUri, photoUris, option }) => {
   // options 에서 상위 몇개 추출할건지..  등 전달
   // 1. normalize 호출 :  greyscale
@@ -17,13 +20,27 @@ const compareImages = async ({ canvas, sketchUri, photoUris, option }) => {
   const sketchHex = await dhash(sketchLuma);
 
   const albumHex = [];
+  const albumHexInfo = [];
   for (const uri of photoUris) {
     const luma = await normalize(canvas, uri);
     if (Array.isArray(luma) && luma.length > 0) {
-      albumHex.push(await dhash(luma));
+      const hex = await dhash(luma);
+      albumHexCache.set(hex, uri);
+      albumHex.push(hex);
+      albumHexInfo.push({ hex, uri });
     }
   }
   console.log(sketchHex);
-  console.log(albumHex[0]);
+  console.log(albumHex);
+  const top5Index = await hamming(sketchHex, albumHex);
+  console.log(top5Index);
+  const top5Uri = [];
+  if (Array.isArray(top5Index)) {
+    for (const idx of top5Index) {
+      const entry = albumHexInfo[idx];
+      if (entry?.uri) top5Uri.push(entry.uri);
+    }
+  }
+  return top5Uri;
 };
 export default compareImages;

@@ -1,4 +1,4 @@
-const WIDTH = 17;
+const WIDTH = 65;
 
 const getBits = async luma => {
   const bits = [];

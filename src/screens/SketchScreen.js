@@ -14,6 +14,7 @@ export default function SketchScreen({ navigation }) {
   const [mode, setMode] = useState('draw');
   const [strokes, setStrokes] = useState([]);
   const [current, setCurrent] = useState([]);
+  const [sketchSize, setSketchSize] = useState({ width: 0, height: 0 });
   const sketchRef = useRef(null);
   const canvasRef = useRef(null);
   const ERASE_RADIUS = 12;
@@ -32,6 +33,7 @@ export default function SketchScreen({ navigation }) {
       quality: 1,
     });
     const dataUri = `data:image/png;base64,${img}`;
+    const allStrokes = current.length ? [...strokes, current] : strokes;
     const photos = await CameraRoll.getPhotos({
       first: 30,
       groupTypes: 'All',
@@ -41,14 +43,20 @@ export default function SketchScreen({ navigation }) {
       return v.node.image.uri;
     });
     console.log(photoUris);
-    compareImages({
+    const compareResult = await compareImages({
       canvas: canvasRef.current,
       sketchUri: dataUri,
+      sketchStrokes: allStrokes,
+      sketchSize,
       photoUris: photoUris,
       option: { top: 3 },
     });
+    console.log(compareResult);
 
-    navigation.navigate('Result', { img: dataUri });
+    navigation.navigate('Result', {
+      img: dataUri,
+      compareResult: compareResult,
+    });
   };
 
   const panResponder = useMemo(
@@ -109,6 +117,10 @@ export default function SketchScreen({ navigation }) {
         panResponder={panResponder}
         current={current}
         sketchRef={sketchRef}
+        onLayout={e => {
+          const { width, height } = e.nativeEvent.layout;
+          setSketchSize({ width, height });
+        }}
       />
       <ToolBar
         handleMode={handleMode}
