@@ -1,14 +1,14 @@
 import normalize from './preprocess/normalize';
-import dhash from './hash/dhash';
+import phash from './hash/phash';
 import hamming from './hash/hamming';
 
 const albumHexCache = new Map();
 const compareImages = async ({ canvas, sketchUri, photoUris, option }) => {
   // options 에서 상위 몇개 추출할건지..  등 전달
   // 1. normalize 호출 :  greyscale
-  // 2. dhash : 양 옆 비교해서 2진법 - > 16진수 64개로  변경(비교용이))
+  // 2. phash : DCT 기반 16진수 해시 생성(비교용이))
   /* normalize(sketchUri); //return luma
-    dhash(luma); //return hex
+    phash(luma); //return hex
     hamming(hex); // return  score */
   if (!canvas || typeof canvas.getContext !== 'function') {
     return;
@@ -17,14 +17,14 @@ const compareImages = async ({ canvas, sketchUri, photoUris, option }) => {
   if (!Array.isArray(sketchLuma) || sketchLuma.length === 0) {
     return;
   }
-  const sketchHex = await dhash(sketchLuma);
+  const sketchHex = await phash(sketchLuma);
 
   const albumHex = [];
   const albumHexInfo = [];
   for (const uri of photoUris) {
     const luma = await normalize(canvas, uri);
     if (Array.isArray(luma) && luma.length > 0) {
-      const hex = await dhash(luma);
+      const hex = await phash(luma);
       albumHexCache.set(hex, uri);
       albumHex.push(hex);
       albumHexInfo.push({ hex, uri });

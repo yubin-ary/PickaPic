@@ -2,7 +2,7 @@ import { Image } from 'react-native-canvas';
 import ImageResizer from 'react-native-image-resizer';
 import RNFS from 'react-native-fs';
 
-const HASH_WIDTH = 65;
+const HASH_WIDTH = 64;
 const HASH_HEIGHT = 64;
 
 const stripFileScheme = path => {
